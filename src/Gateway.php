@@ -11,38 +11,38 @@ class Gateway extends AbstractGateway
         return 'Getapay';
     }
 
-    public function getEmail()
+
+    public function getApikey()
     {
-        return $this->getParameter('email');
+        return $this->getParameter('api_key');
     }
 
-    public function setEmail($value)
+    public function setApikey($value)
     {
-        return $this->setParameter('email', $value);
+        return $this->setParameter('api_key', $value);
     }
 
-    public function getPassword()
+    public function getSecretkey()
     {
-        return $this->getParameter('password');
+        return $this->getParameter('secret_key');
     }
 
-    public function setPassword($value)
+    public function setSecretkey($value)
     {
-        return $this->setParameter('password', $value);
+        return $this->setParameter('secret_key', $value);
     }
-
 
     public function purchase(array $parameters = [])
     {
         return $this->createRequest('\Omnipay\Getapay\Message\PurchaseRequest', $parameters)
-            ->setEmail($this->getEmail())
-            ->setPassword($this->getPassword());
+            ->setApikey($this->getApikey())
+            ->setSecretkey($this->getSecretkey());
     }
 
     public function payout(array $parameters = [])
     {
         return $this->createRequest('\Omnipay\Getapay\Message\PayoutRequest', $parameters)
-            ->setEmail($this->getEmail())
-            ->setPassword($this->getPassword());
+            ->setApikey($this->getApikey())
+            ->setSecretkey($this->getSecretkey());
     }
 }
