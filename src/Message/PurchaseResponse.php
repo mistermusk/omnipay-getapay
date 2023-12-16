@@ -4,7 +4,7 @@
 namespace Omnipay\Getapay\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
-
+use Omnipay\Common\Message\RedirectResponseInterface;
 class PurchaseResponse extends AbstractResponse implements RedirectResponseInterface
 {
     public function isSuccessful()
