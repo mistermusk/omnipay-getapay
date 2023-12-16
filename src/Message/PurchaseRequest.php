@@ -154,7 +154,7 @@ class PurchaseRequest extends AbstractRequest
         $data['signature'] = $this->createSignature($data, $this->getSecretkey());
         $postData = json_encode($data);
 
-        $httpResponse = $this->httpClient->request('POST', 'https://api.example.com/dev/invoices', [],  $postData);
+        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/invoices', [],  $postData);
         return $this->createResponse($httpResponse->getBody()->getContents());
 
     }
