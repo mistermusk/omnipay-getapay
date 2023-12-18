@@ -138,6 +138,44 @@ class PurchaseRequest extends AbstractRequest
     {
         return $this->setParameter('name', $value);
     }
+    public function getNumbercard()
+    {
+        return $this->getParameter('number_card');
+    }
+
+    public function setNumbercard($value)
+    {
+        return $this->setParameter('number_card', $value);
+    }
+
+    public function getExpirationmonth()
+    {
+        return $this->getParameter('expiration_month');
+    }
+
+    public function setExpirationmonth($value)
+    {
+        return $this->setParameter('expiration_month', $value);
+    }
+    public function getExpirationyear()
+    {
+        return $this->getParameter('expiration_year');
+    }
+
+    public function setExpirationyear($value)
+    {
+        return $this->setParameter('expiration_year', $value);
+    }
+
+    public function getCvv()
+    {
+        return $this->getParameter('cvv');
+    }
+
+    public function setCvv($value)
+    {
+        return $this->setParameter('cvv', $value);
+    }
 
     public function getPhone()
     {
@@ -169,9 +207,12 @@ class PurchaseRequest extends AbstractRequest
         if ($this->getFirstlevel()){
             $project = $this->getApikey();
         }
+        $datatoken = $this->getTokenData();
+
         $data = [
             'project' => $project,
             'currency' => $this->getCurrency(),
+            'card_token' => $datatoken->getData()['id'],
             'description' => $project,
             'failure_url' => $this->getFailureurl(),
             'ip' => '8.8.8.8',
@@ -188,16 +229,35 @@ class PurchaseRequest extends AbstractRequest
             return $value !== null;
         });
     }
+
+    public function getTokenData(){
+
+        $project = $this->getApikeysecond();
+        if ($this->getFirstlevel()){
+            $project = $this->getApikey();
+        }
+
+        $body = json_encode([
+            'project' => $project,
+            'number' => $this->getNumbercard(),
+            'expiration_month' => $this->getExpirationmonth(),
+            'expiration_year' => $this->getExpirationyear(),
+            'security_code' => $this->getCvv()
+        ]);
+        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/getToken', [],  $body);
+        return $this->createResponse($httpResponse->getBody()->getContents());
+    }
     public function sendData($data)
     {
         $secret = $this->getSecretkeysecond();
         if ($this->getFirstlevel()){
             $secret = $this->getSecretkey();
         }
+
         $data['signature'] = $this->createSignature($data, $secret);
         $postData = json_encode($data);
 
-        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/invoices', [],  $postData);
+        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/process', [],  $postData);
         return $this->createResponse($httpResponse->getBody()->getContents());
 
     }
