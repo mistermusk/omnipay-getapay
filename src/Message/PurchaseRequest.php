@@ -254,7 +254,7 @@ class PurchaseRequest extends AbstractRequest
         }
 
         $datatoken = $this->getTokenData();
-        $data['card_token'] = $datatoken->getData()['id'];
+//        $data['card_token'] = $datatoken->getData()['id'];
 //        $data['signature'] = $this->createSignature($data, $secret);
 
         $postData = json_encode($data);
