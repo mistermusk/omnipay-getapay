@@ -9,12 +9,12 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
 {
     public function isSuccessful()
     {
-        return isset($this->data[]['payment_url']);
+        return isset($this->data['success']) == 1;
     }
 
     public function getRedirectUrl()
     {
-        return isset($this->data['payment_url']) ? $this->data['payment_url'] : null;
+        return isset($this->data['acs']['url']) ? $this->data['acs']['url'] : null;
     }
 
     public function getMessage()

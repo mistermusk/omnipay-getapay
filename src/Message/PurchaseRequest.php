@@ -254,6 +254,7 @@ class PurchaseRequest extends AbstractRequest
             $secret = $this->getSecretkey();
         }
 
+        print_r(json_encode($data));
         $data['signature'] = $this->createSignature($data, $secret);
         $postData = json_encode($data);
 
