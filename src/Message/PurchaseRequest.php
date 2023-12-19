@@ -255,11 +255,11 @@ class PurchaseRequest extends AbstractRequest
 
         $datatoken = $this->getTokenData();
         $data['card_token'] = $datatoken->getData()['id'];
-        $data['signature'] = $this->createSignature($data, $secret);
+//        $data['signature'] = $this->createSignature($data, $secret);
 
         $postData = json_encode($data);
 
-        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/process', [],  $postData);
+//        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/process', [],  $postData);
         return $datatoken;
 
     }
