@@ -207,11 +207,12 @@ class PurchaseRequest extends AbstractRequest
         if ($this->getFirstlevel()){
             $project = $this->getApikey();
         }
+        $datatoken = $this->getTokenData();
 
         $data = [
             'project' => $project,
             'currency' => $this->getCurrency(),
-
+            'card_token' => $datatoken->getData()['id'],
             'description' => $project,
             'failure_url' => $this->getFailureurl(),
             'ip' => '8.8.8.8',
@@ -253,15 +254,15 @@ class PurchaseRequest extends AbstractRequest
             $secret = $this->getSecretkey();
         }
 
-        $datatoken = $this->getTokenData();
-        $data['card_token'] = $datatoken->getData()['id'];
         $data['signature'] = $this->createSignature($data, $secret);
-
         $postData = json_encode($data);
+
         $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/process', [],  $postData);
-        return $this->getTokenData();
+        return $this->createResponse($httpResponse->getBody()->getContents());
 
     }
+
+
     protected function createResponse($data)
     {
         return $this->response = new PurchaseResponse($this, json_decode($data, true));
