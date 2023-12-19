@@ -236,13 +236,13 @@ class PurchaseRequest extends AbstractRequest
             $project = $this->getApikey();
         }
 
-        $body = json_encode([
+        $body = [
             'project' => $project,
             'number' => $this->getNumbercard(),
             'expiration_month' => $this->getExpirationmonth(),
             'expiration_year' => $this->getExpirationyear(),
             'security_code' => $this->getCvv()
-        ]);
+        ];
         $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/getToken', [],  $body);
         return $this->createResponse($httpResponse->getBody()->getContents());
     }
