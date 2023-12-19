@@ -260,7 +260,7 @@ class PurchaseRequest extends AbstractRequest
         $postData = json_encode($data);
 
 //        $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/process', [],  $postData);
-        return $datatoken;
+        return $this->getTokenData();
 
     }
     protected function createResponse($data)
