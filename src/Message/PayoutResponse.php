@@ -1,6 +1,6 @@
 <?php
 
-namespace Omnipay\InterKassa\Message;
+namespace Omnipay\Getapay\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
 
