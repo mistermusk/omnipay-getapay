@@ -52,6 +52,13 @@ class Gateway extends AbstractGateway
         return $this->setParameter('secret_key_second', $value);
     }
 
+    protected function createSignature($data, $secretKey) {
+        $values = array_values($data);
+        sort($values, SORT_STRING);
+        $joinedParams = implode("|", $values);
+        return hash_hmac('sha256', $joinedParams, hex2bin($secretKey));
+    }
+
     public function isSignatureValid(array $callbackData, $first_level)
     {
         try {
@@ -66,8 +73,7 @@ class Gateway extends AbstractGateway
             if ($first_level){
                 $secret = $this->getSecretkey();
             }
-            $dataString = implode('|', $fieldsToSign);
-            $computedSignature = hash_hmac('sha256', $dataString, $secret);
+            $computedSignature = $this->createSignature($callbackData, $secret);
             return $computedSignature === $signature;
         } catch (Exception $e) {
             return false;
