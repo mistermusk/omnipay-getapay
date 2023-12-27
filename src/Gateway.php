@@ -10,46 +10,22 @@ class Gateway extends AbstractGateway
     {
         return 'Getapay';
     }
-
-
-    public function getApikey()
+    private $keys = [];
+    public function setKeys($apiData)
     {
-        return $this->getParameter('api_key');
+        $this->keys = $apiData;
     }
 
-    public function setApikey($value)
+    public function getKeys()
     {
-        return $this->setParameter('api_key', $value);
+        return $this->keys;
     }
 
-    public function getSecretkey()
-    {
-        return $this->getParameter('secret_key');
-    }
-
-    public function setSecretkey($value)
-    {
-        return $this->setParameter('secret_key', $value);
-    }
-
-    public function getApikeysecond()
-    {
-        return $this->getParameter('api_key_second');
-    }
-
-    public function setApikeysecond($value)
-    {
-        return $this->setParameter('api_key_second', $value);
-    }
-
-    public function getSecretkeysecond()
-    {
-        return $this->getParameter('secret_key_second');
-    }
-
-    public function setSecretkeysecond($value)
-    {
-        return $this->setParameter('secret_key_second', $value);
+    public function formatLevel($level){
+        if ($level){
+            return 'first_level';
+        }
+        return 'second_level';
     }
 
     protected function createSignature($data, $secretKey) {
@@ -59,22 +35,18 @@ class Gateway extends AbstractGateway
         return hash_hmac('sha256', $joinedParams, hex2bin($secretKey));
     }
 
-    public function isSignatureValid(array $callbackData, $first_level)
+    public function isSignatureValidDeposit($sign, $data, $level, $method, $currency)
     {
         try {
-            $signature = $callbackData['signature'];
-            $callbackData['signature'] = null;
-            $fieldsToSign = array_filter($callbackData, function ($value) {
+            $data['signature'] = null;
+            $data = array_filter($data, function ($value) {
                 return $value !== null && !is_array($value);
             });
 
+            $secret = (string) $this->getKeys()['api_deposit'][$this->formatLevel($level)][$method][$currency]['secret_key'];
 
-            $secret = $this->getSecretkeysecond();
-            if ($first_level){
-                $secret = $this->getSecretkey();
-            }
-            $computedSignature = $this->createSignature($callbackData, $secret);
-            return $computedSignature === $signature;
+            $computedSignature = $this->createSignature($data, $secret);
+            return $computedSignature === $sign;
         } catch (Exception $e) {
             return false;
         }
@@ -84,17 +56,13 @@ class Gateway extends AbstractGateway
     public function purchase(array $parameters = [])
     {
         return $this->createRequest('\Omnipay\Getapay\Message\PurchaseRequest', $parameters)
-            ->setApikey($this->getApikey())
-            ->setSecretkey($this->getSecretkey())
-            ->setApikeysecond($this->getApikeysecond())
-            ->setSecretkeysecond($this->getSecretkeysecond());
+            ->setKeys($this->getKeys());
     }
 
     public function payout(array $parameters = [])
     {
         return $this->createRequest('\Omnipay\Getapay\Message\PayoutRequest', $parameters)
-            ->setApikey($this->getApikey())
-            ->setSecretkey($this->getSecretkey());
+            ->setKeys($this->getKeys());
 
 
     }

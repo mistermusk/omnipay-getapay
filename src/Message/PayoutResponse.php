@@ -10,7 +10,7 @@ class PayoutResponse extends AbstractResponse
     public function isSuccessful()
     {
         if (isset($this->data['success'])) {
-            if ($this->data['success'] === true) {
+            if ($this->data['success']) {
                 return true;
             }
         }

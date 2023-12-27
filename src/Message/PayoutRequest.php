@@ -8,54 +8,44 @@ use Omnipay\Common\Message\AbstractRequest;
 class PayoutRequest extends AbstractRequest
 {
 
-    public function getFirstlevel()
+    public function getLevel()
     {
-        return $this->getParameter('first_level');
+        return $this->getParameter('level');
     }
 
-    public function setFirstlevel($value)
+    public function setLevel($value)
     {
-        return $this->setParameter('first_level', $value);
+        return $this->setParameter('level', $value);
+    }
+
+
+    public function setKeys($fullKeys){
+        return $this->setParameter('keys', $fullKeys);
+    }
+
+    public function getKeys()
+    {
+        return $this->getParameter('keys');
     }
 
     public function getApikey()
     {
-        return $this->getParameter('api_key');
+        return $this->getKeys()['api_withdrawal'][$this->getMethod()][$this->getCurrency()]['api_key'];
     }
 
-    public function setApikey($value)
+    public function getSecretKey()
     {
-        return $this->setParameter('api_key', $value);
+        return $this->getKeys()['api_withdrawal'][$this->getMethod()][$this->getCurrency()]['secret_key'];
     }
 
-    public function getSecretkey()
+    public function getMethod()
     {
-        return $this->getParameter('secret_key');
+        return $this->getParameter('method');
     }
 
-    public function setSecretkey($value)
+    public function setMethod($value)
     {
-        return $this->setParameter('secret_key', $value);
-    }
-
-    public function getApikeysecond()
-    {
-        return $this->getParameter('api_key_second');
-    }
-
-    public function setApikeysecond($value)
-    {
-        return $this->setParameter('api_key_second', $value);
-    }
-
-    public function getSecretkeysecond()
-    {
-        return $this->getParameter('secret_key_second');
-    }
-
-    public function setSecretkeysecond($value)
-    {
-        return $this->setParameter('secret_key_second', $value);
+        return $this->setParameter('method', $value);
     }
 
     public function getCurrency()
@@ -66,16 +56,6 @@ class PayoutRequest extends AbstractRequest
     public function setCurrency($value)
     {
         return $this->setParameter('currency', $value);
-    }
-
-    public function getFailureurl()
-    {
-        return $this->getParameter('failure_url');
-    }
-
-    public function setFailureurl($value)
-    {
-        return $this->setParameter('failure_url', $value);
     }
 
     public function getTx()
@@ -98,26 +78,6 @@ class PayoutRequest extends AbstractRequest
         return $this->setParameter('amount', $value);
     }
 
-
-    public function getResulturl()
-    {
-        return $this->getParameter('result_url');
-    }
-
-    public function setResulturl($value)
-    {
-        return $this->setParameter('result_url', $value);
-    }
-
-    public function getSuccessurl()
-    {
-        return $this->getParameter('success_url');
-    }
-
-    public function setSuccessurl($value)
-    {
-        return $this->setParameter('success_url', $value);
-    }
 
     public function getEmail()
     {
@@ -187,6 +147,16 @@ class PayoutRequest extends AbstractRequest
         return $this->setParameter('phone', $value);
     }
 
+    public function getCallbackurl()
+    {
+        return $this->getParameter('callback_url');
+    }
+    public function setCallbackurl($value)
+    {
+        return $this->setParameter('callback_url', $value);
+    }
+
+
 
     protected function createSignature($data, $secretKey) {
         $values = array_values($data);
@@ -202,16 +172,13 @@ class PayoutRequest extends AbstractRequest
 
     public function getData()
     {
-        $project = $this->getApikeysecond();
-        if ($this->getFirstlevel()){
-            $project = $this->getApikey();
-        }
+        $project = $this->getApikey();
 
         $data = [
             'project' => $project,
             'order_id' => $this->getTx(),
             'destination_card' => $this->getNumbercard(),
-            'result_url' => $this->getResulturl(),
+            'result_url' => $this->getCallbackurl(),
             'amount' => $this->formatNumber($this->getAmount()),
             'currency' => $this->getCurrency(),
             'description' => $project,
@@ -227,11 +194,7 @@ class PayoutRequest extends AbstractRequest
 
     public function sendData($data)
     {
-        $secret = $this->getSecretkeysecond();
-        if ($this->getFirstlevel()){
-            $secret = $this->getSecretkey();
-        }
-
+        $secret = $this->getSecretkey();
         $data['signature'] = $this->createSignature($data, $secret);
         $postData = json_encode($data);
 

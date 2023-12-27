@@ -8,54 +8,45 @@ use Omnipay\Common\Message\AbstractRequest;
 class PurchaseRequest extends AbstractRequest
 {
 
-    public function getFirstlevel()
-    {
-        return $this->getParameter('first_level');
+    public function setKeys($fullKeys){
+        return $this->setParameter('keys', $fullKeys);
     }
 
-    public function setFirstlevel($value)
+    public function getKeys()
     {
-        return $this->setParameter('first_level', $value);
+        return $this->getParameter('keys');
+    }
+
+
+    public function getLevel()
+    {
+        return $this->getParameter('level');
+    }
+
+    public function setLevel($value)
+    {
+        return $this->setParameter('level', $value);
     }
 
     public function getApikey()
     {
-        return $this->getParameter('api_key');
+        return $this->getKeys()['api_deposit'][$this->getLevel()][$this->getMethod()][$this->getCurrency()]['api_key'];
     }
 
-    public function setApikey($value)
-    {
-        return $this->setParameter('api_key', $value);
-    }
 
     public function getSecretkey()
     {
-        return $this->getParameter('secret_key');
+        return $this->getKeys()['api_deposit'][$this->getLevel()][$this->getMethod()][$this->getCurrency()]['secret_key'];
     }
 
-    public function setSecretkey($value)
+    public function getMethod()
     {
-        return $this->setParameter('secret_key', $value);
+        return $this->getParameter('method');
     }
 
-    public function getApikeysecond()
+    public function setMethod($value)
     {
-        return $this->getParameter('api_key_second');
-    }
-
-    public function setApikeysecond($value)
-    {
-        return $this->setParameter('api_key_second', $value);
-    }
-
-    public function getSecretkeysecond()
-    {
-        return $this->getParameter('secret_key_second');
-    }
-
-    public function setSecretkeysecond($value)
-    {
-        return $this->setParameter('secret_key_second', $value);
+        return $this->setParameter('method', $value);
     }
 
     public function getCurrency()
@@ -68,15 +59,6 @@ class PurchaseRequest extends AbstractRequest
         return $this->setParameter('currency', $value);
     }
 
-    public function getFailureurl()
-    {
-        return $this->getParameter('failure_url');
-    }
-
-    public function setFailureurl($value)
-    {
-        return $this->setParameter('failure_url', $value);
-    }
 
     public function getTx()
     {
@@ -96,27 +78,6 @@ class PurchaseRequest extends AbstractRequest
     public function setAmount($value)
     {
         return $this->setParameter('amount', $value);
-    }
-
-
-    public function getResulturl()
-    {
-        return $this->getParameter('result_url');
-    }
-
-    public function setResulturl($value)
-    {
-        return $this->setParameter('result_url', $value);
-    }
-
-    public function getSuccessurl()
-    {
-        return $this->getParameter('success_url');
-    }
-
-    public function setSuccessurl($value)
-    {
-        return $this->setParameter('success_url', $value);
     }
 
     public function getEmail()
@@ -187,6 +148,20 @@ class PurchaseRequest extends AbstractRequest
         return $this->setParameter('phone', $value);
     }
 
+    public function getRedirecturl()
+    {
+        return $this->getKeys()['redirect_url'];
+    }
+
+    public function getCallbackurl()
+    {
+        return $this->getParameter('callback_url');
+    }
+    public function setCallbackurl($value)
+    {
+        return $this->setParameter('callback_url', $value);
+    }
+
 
     protected function createSignature($data, $secretKey) {
         $values = array_values($data);
@@ -202,11 +177,7 @@ class PurchaseRequest extends AbstractRequest
 
     public function getData()
     {
-
-        $project = $this->getApikeysecond();
-        if ($this->getFirstlevel()){
-            $project = $this->getApikey();
-        }
+        $project = $this->getApikey();
         $datatoken = $this->getTokenData();
 
         $data = [
@@ -214,12 +185,12 @@ class PurchaseRequest extends AbstractRequest
             'currency' => $this->getCurrency(),
             'card_token' => $datatoken->getData()['id'],
             'description' => $project,
-            'failure_url' => $this->getFailureurl(),
             'ip' => '8.8.8.8',
             'order_id' => $this->getTx(),
             'price' => $this->formatNumber($this->getAmount()),
-            'result_url' => $this->getResulturl(),
-            'success_url' => $this->getSuccessurl(),
+            'result_url' => $this->getCallbackurl(),
+            'success_url' => $this->getRedirecturl(),
+            'failure_url' => $this->getRedirecturl(),
             'user_contact_email' => $this->getEmail(),
             'user_name' => $this->getName(),
             'user_phone' => $this->getPhone(),
@@ -232,10 +203,7 @@ class PurchaseRequest extends AbstractRequest
 
     public function getTokenData(){
 
-        $project = $this->getApikeysecond();
-        if ($this->getFirstlevel()){
-            $project = $this->getApikey();
-        }
+        $project = $this->getApikey();
 
         $body = json_encode([
             'project' => $project,
@@ -247,13 +215,10 @@ class PurchaseRequest extends AbstractRequest
         $httpResponse = $this->httpClient->request('POST', 'https://api.payprogate.com/dev/card/getToken', [],  $body);
         return $this->createResponse($httpResponse->getBody()->getContents());
     }
+
     public function sendData($data)
     {
-        $secret = $this->getSecretkeysecond();
-        if ($this->getFirstlevel()){
-            $secret = $this->getSecretkey();
-        }
-
+        $secret = $this->getSecretkey();
         $data['signature'] = $this->createSignature($data, $secret);
         $postData = json_encode($data);
 
@@ -261,7 +226,6 @@ class PurchaseRequest extends AbstractRequest
         return $this->createResponse($httpResponse->getBody()->getContents());
 
     }
-
 
     protected function createResponse($data)
     {
